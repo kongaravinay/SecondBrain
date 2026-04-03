@@ -135,6 +135,44 @@ export function useNotes() {
     })
   }, [])
 
+  /** RAG: vectorize question, find top notes, ask AI with context */
+  const chatWithBrain = useCallback(async (
+    question: string,
+    currentNotes: Note[]
+  ): Promise<{ answer: string; sources: Note[] }> => {
+    // Step 1: vectorize the question
+    let sources: Note[] = []
+    let context: string[] = []
+
+    if (currentNotes.length > 0) {
+      const searchRes = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: question }),
+      })
+      const searchData = await searchRes.json()
+      if (searchData.vector) {
+        // Step 2: rank notes by relevance
+        const ranked = rankByRelevance(searchData.vector, currentNotes, 5)
+        sources = ranked.filter(r => r.score > 0.25).map(r => r.note)
+        context = sources.map(n =>
+          `${n.content}\n[Tags: ${n.analysis.tags.join(', ')}] [Insight: ${n.analysis.keyInsight}]`
+        )
+      }
+    }
+
+    // Step 3: ask AI with grounded context
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, context }),
+    })
+    const data = await res.json()
+    if (!res.ok || data.error) throw new Error(data.error || 'Chat failed')
+
+    return { answer: data.answer, sources }
+  }, [])
+
   return {
     notes,
     isAnalyzing,
@@ -148,6 +186,7 @@ export function useNotes() {
     clearSearch,
     clearAllNotes,
     importNotesList,
+    chatWithBrain,
     setError,
   }
 }

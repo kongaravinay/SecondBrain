@@ -12,6 +12,7 @@ import SearchBar from '@/components/SearchBar'
 import KnowledgeGraph from '@/components/KnowledgeGraph'
 import NodeDetail from '@/components/NodeDetail'
 import DimensionLegend from '@/components/DimensionLegend'
+import ChatPanel from '@/components/ChatPanel'
 import { useNotes } from '@/hooks/useNotes'
 import { useForceGraph } from '@/hooks/useForceGraph'
 import { exportNotes, importNotes } from '@/lib/storage'
@@ -20,6 +21,7 @@ export default function Page() {
   const mainRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [graphSize, setGraphSize] = useState({ width: 800, height: 600 })
+  const [chatOpen, setChatOpen] = useState(false)
   const hasSynced = useRef(false)
 
   // Must mount client-side before rendering canvas / reading localStorage
@@ -56,6 +58,7 @@ export default function Page() {
     clearSearch,
     clearAllNotes,
     importNotesList,
+    chatWithBrain,
   } = useNotes()
 
   // ---- Graph state ----
@@ -208,6 +211,26 @@ export default function Page() {
             onDelete={handleDeleteNote}
             onSelectNote={handleSelectNote}
           />
+
+          {/* Chat toggle button */}
+          {!chatOpen && (
+            <button
+              onClick={() => setChatOpen(true)}
+              style={styles.chatFab}
+              title="Ask your brain"
+            >
+              <span style={{ fontSize: 20 }}>🧠</span>
+              <span style={styles.chatFabLabel}>Ask</span>
+            </button>
+          )}
+
+          {/* RAG Chat Panel */}
+          <ChatPanel
+            isOpen={chatOpen}
+            onClose={() => setChatOpen(false)}
+            onAsk={(q) => chatWithBrain(q, notes)}
+            noteCount={notes.length}
+          />
         </div>
       </div>
 
@@ -250,5 +273,27 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'relative',
     overflow: 'hidden',
     background: '#0a0a12',
+  },
+  chatFab: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    background: 'rgba(124,58,237,0.85)',
+    border: '1px solid rgba(124,58,237,0.6)',
+    borderRadius: 50,
+    color: '#fff',
+    padding: '10px 18px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    boxShadow: '0 4px 20px rgba(124,58,237,0.4)',
+    zIndex: 40,
+    transition: 'transform 0.15s, box-shadow 0.15s',
+  },
+  chatFabLabel: {
+    fontSize: 13,
+    fontWeight: 600,
+    letterSpacing: 0.3,
   },
 }
