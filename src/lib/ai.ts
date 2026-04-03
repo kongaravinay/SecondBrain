@@ -1,14 +1,14 @@
 // ============================================================
 // SECOND BRAIN — Universal AI Provider
-// Supports: Ollama (local) | Groq | Claude | Google Gemini
+// Supports: Ollama (local) | Groq | Claude | Gemini | xAI Grok
 // Set AI_PROVIDER in .env.local to switch between them
 // ============================================================
 
-export type Provider = 'ollama' | 'groq' | 'claude' | 'gemini'
+export type Provider = 'ollama' | 'groq' | 'claude' | 'gemini' | 'grok'
 
 export function getProvider(): Provider {
   const p = (process.env.AI_PROVIDER || 'ollama').toLowerCase()
-  if (['ollama', 'groq', 'claude', 'gemini'].includes(p)) return p as Provider
+  if (['ollama', 'groq', 'claude', 'gemini', 'grok'].includes(p)) return p as Provider
   return 'ollama'
 }
 
@@ -33,6 +33,7 @@ export async function chat(messages: ChatMessage[], options: AIOptions = {}): Pr
     case 'groq':    return chatGroq(messages, options)
     case 'claude':  return chatClaude(messages, options)
     case 'gemini':  return chatGemini(messages, options)
+    case 'grok':    return chatGrok(messages, options)
     default:        return chatOllama(messages, options)
   }
 }
@@ -146,4 +147,32 @@ async function chatGemini(messages: ChatMessage[], options: AIOptions): Promise<
   if (!res.ok) throw new Error(`Gemini error ${res.status}: ${await res.text()}`)
   const data = await res.json()
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+}
+
+// ---- xAI GROK ----
+// xAI API is OpenAI-compatible — easy to integrate
+async function chatGrok(messages: ChatMessage[], options: AIOptions): Promise<string> {
+  const apiKey = process.env.XAI_API_KEY
+  if (!apiKey) throw new Error('XAI_API_KEY is not set in .env.local')
+
+  const model = process.env.GROK_MODEL || options.model || 'grok-3-mini'
+
+  const res = await fetch('https://api.x.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: options.temperature ?? 0.1,
+      max_tokens: options.maxTokens ?? 512,
+      response_format: options.forceJson ? { type: 'json_object' } : undefined,
+    }),
+  })
+
+  if (!res.ok) throw new Error(`Grok error ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  return data.choices?.[0]?.message?.content ?? ''
 }
