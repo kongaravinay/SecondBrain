@@ -22,3 +22,5 @@
 *.pem
 Thumbs.db
 npm-debug.log*
+
+.vercel
