@@ -1,0 +1,456 @@
+================================================================
+        SECOND BRAIN — COMPLETE GUIDE
+        Written simply, like explaining to a 13-year-old
+================================================================
+
+----------------------------------------------------------------
+  WHAT IS THIS APP?
+----------------------------------------------------------------
+
+Imagine you have a notebook. Every time you write something in it,
+a really smart robot reads it and figures out:
+
+  - What topics it is about (like AI, health, business, etc.)
+  - A short summary of what you wrote
+  - The single most important idea from it
+  - A "fingerprint" made of 20 numbers that describes the idea
+
+Then it draws a map of all your notes. Notes about similar topics
+get connected with lines. The more similar two notes are, the
+thicker and brighter the line between them.
+
+Over time, your map becomes a picture of everything you know.
+You can search it, click on any note, and see what other ideas
+in your brain are connected to it.
+
+That is your Second Brain.
+
+
+----------------------------------------------------------------
+  HOW DOES IT ACTUALLY WORK? (The simple version)
+----------------------------------------------------------------
+
+STEP 1 — You type a note
+  You write anything in the box at the bottom of the screen.
+  It could be something you learned, an idea, a fact, anything.
+
+STEP 2 — AI reads it
+  The app sends your note to an AI model (a computer program
+  that understands language, like a very smart autocomplete).
+  The AI reads your note and writes back a JSON response.
+
+  JSON is just information written in a very organized way.
+  Like this:
+    {
+      "tags": ["AI", "learning", "future"],
+      "summary": "AI will change most jobs in 10 years",
+      "keyInsight": "Creative work will survive automation",
+      "vector": [0.9, 0.1, 0.0, 0.2, 0.3, ...]
+    }
+
+STEP 3 — The 20-number fingerprint (the vector)
+  The most important part is that list of 20 numbers called a
+  "vector". Each number (0.0 to 1.0) represents how much your
+  note is about one specific topic:
+
+  Number 0  = AI and machine learning
+  Number 1  = Programming and coding
+  Number 2  = Mathematics
+  Number 3  = Science
+  Number 4  = Business
+  Number 5  = Health
+  Number 6  = Philosophy
+  Number 7  = Art
+  Number 8  = History
+  Number 9  = Psychology
+  Number 10 = Physics
+  Number 11 = Biology
+  Number 12 = Society
+  Number 13 = Education
+  Number 14 = Technology
+  Number 15 = Personal life
+  Number 16 = Language
+  Number 17 = Systems and engineering
+  Number 18 = Data
+  Number 19 = Other
+
+  Example: A note about Python code would look like:
+  [0.2, 0.95, 0.3, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+   0.0, 0.0, 0.0, 0.1, 0.8, 0.0, 0.0, 0.4, 0.5, 0.0]
+         ^          ^                        ^
+    AI (a little)  Programming (a lot)    Technology (quite a bit)
+
+STEP 4 — Comparing notes with math
+  To figure out if two notes are similar, the app uses a
+  math formula called COSINE SIMILARITY.
+
+  Imagine each note's 20 numbers as an arrow pointing in
+  a direction in 20-dimensional space. If two arrows point
+  in the same direction, the notes are similar. If they
+  point in completely different directions, they are unrelated.
+
+  The formula:
+    similarity = dot_product(A, B) / (length(A) * length(B))
+
+  dot_product means: multiply each pair of numbers and add them up
+  length means: square each number, add them up, take the square root
+
+  Result is a number from 0 to 1:
+    1.0 = identical topics
+    0.7 = very similar
+    0.4 = somewhat related
+    0.0 = completely different
+
+STEP 5 — Drawing the graph
+  The app draws all your notes as colored circles on the screen.
+  The color of each circle tells you what category the note
+  belongs to (purple = AI, blue = programming, green = science, etc.)
+
+  Then it draws lines between notes that are similar enough
+  (similarity score above 0.4 by default).
+
+  The lines are:
+    - Thicker if the notes are more similar
+    - More transparent if they are less similar
+
+STEP 6 — Physics simulation
+  The circles are not just placed randomly. They use a physics
+  simulation called Fruchterman-Reingold (a famous algorithm
+  from 1991 used in graph drawing software).
+
+  Think of it like magnets:
+    - Every circle PUSHES every other circle away (repulsion)
+    - Connected circles PULL toward each other (attraction)
+    - Over time, they settle into a natural layout where
+      similar notes cluster together
+
+  The math for this:
+    Push force  = k squared / distance
+    Pull force  = distance squared / k   (times similarity)
+    k           = square root of (screen area / number of notes)
+
+STEP 7 — Search
+  When you search for something, the AI converts your search
+  words into the same kind of 20-number fingerprint.
+  Then it compares that fingerprint to all your notes and
+  shows you the most similar ones, sorted by score.
+
+  This is called SEMANTIC SEARCH — it finds meaning, not
+  just matching words. Search for "staying healthy" and it
+  might find a note about "exercise habits" even if those
+  exact words were not in your search.
+
+
+----------------------------------------------------------------
+  WHAT TECHNOLOGY IS IT BUILT WITH?
+----------------------------------------------------------------
+
+NEXT.JS
+  A framework for building websites. Handles both the thing
+  you see in your browser AND the server code that talks to
+  the AI. Think of it as the building blocks of the whole app.
+
+REACT
+  A JavaScript library for building what you see on screen.
+  All the buttons, boxes, text, and panels are built with React.
+  React updates only what changed instead of reloading the page.
+
+TYPESCRIPT
+  Like JavaScript (the language that makes websites interactive)
+  but with extra rules that catch mistakes before they cause bugs.
+
+HTML CANVAS
+  The knowledge graph is drawn on an HTML Canvas element.
+  This is like a whiteboard inside the browser where you can
+  draw anything using code — circles, lines, colors, etc.
+
+OLLAMA
+  A free program you installed on your PC that runs AI models
+  locally. No internet needed. No cost. Your data never leaves
+  your computer. It works like a mini-server on your machine.
+
+QWEN2.5:7B (the AI model)
+  A 4.4GB AI model made by Alibaba. It runs inside Ollama.
+  It is very good at understanding text and writing structured
+  data (like JSON). It runs on your PC's RAM.
+
+LOCALSTORAGE
+  A way to save data in your browser permanently. Your notes
+  are stored here — so when you refresh the page, they are
+  still there. It is like a tiny database built into Chrome/Edge.
+
+BUN
+  A fast JavaScript runtime (like Node.js but faster). Used
+  to install packages and run the app on your computer.
+
+
+----------------------------------------------------------------
+  YOUR PROJECT FILES EXPLAINED
+----------------------------------------------------------------
+
+E:\secound brain\
+│
+├── .env.local              ← Settings file (Ollama URL, model name)
+├── package.json            ← List of all the libraries the app uses
+├── next.config.ts          ← Settings for Next.js
+│
+├── src\
+│   ├── app\
+│   │   ├── page.tsx        ← THE MAIN PAGE. All parts connect here.
+│   │   ├── layout.tsx      ← The outer shell (HTML head, font loading)
+│   │   ├── globals.css     ← Global styles (dark background, fonts, etc.)
+│   │   │
+│   │   └── api\
+│   │       ├── analyze\
+│   │       │   └── route.ts  ← SERVER: sends note to Ollama, gets JSON back
+│   │       └── search\
+│   │           └── route.ts  ← SERVER: turns a search query into a vector
+│   │
+│   ├── components\         ← Visual building blocks of the UI
+│   │   ├── Header.tsx        ← Top bar (title, stats, buttons)
+│   │   ├── KnowledgeGraph.tsx← The canvas graph with physics simulation
+│   │   ├── NoteInput.tsx     ← The text box at the bottom for adding notes
+│   │   ├── NoteList.tsx      ← The list of notes in the left sidebar
+│   │   ├── NoteCard.tsx      ← One note card in the sidebar
+│   │   ├── NodeDetail.tsx    ← Panel that shows when you click a graph node
+│   │   ├── SearchBar.tsx     ← The search box at the top of the sidebar
+│   │   └── DimensionLegend.tsx← The color legend showing all 20 categories
+│   │
+│   ├── hooks\              ← Reusable logic (like functions, but for React)
+│   │   ├── useNotes.ts       ← Manages adding, deleting, searching notes
+│   │   └── useForceGraph.ts  ← Manages the physics simulation and graph state
+│   │
+│   ├── lib\                ← Pure utility functions (no UI)
+│   │   ├── vectorMath.ts     ← dot product, magnitude, cosine similarity
+│   │   ├── forceLayout.ts    ← Fruchterman-Reingold physics algorithm
+│   │   ├── colors.ts         ← The 20 colors for each knowledge dimension
+│   │   └── storage.ts        ← Save/load/export/import from localStorage
+│   │
+│   └── types\
+│       └── index.ts          ← TypeScript type definitions (shapes of data)
+│
+└── node_modules\           ← All downloaded libraries (do not touch)
+
+
+----------------------------------------------------------------
+  HOW TO RUN IT ON YOUR COMPUTER (every time)
+----------------------------------------------------------------
+
+You need to do TWO things every time you want to use the app:
+
+STEP 1 — Start Ollama (the AI engine)
+  Open PowerShell or Command Prompt and type:
+    ollama serve
+  Leave that window open. Do not close it.
+
+STEP 2 — Start the app
+  Open a NEW PowerShell window, go to the project folder:
+    cd "E:\secound brain"
+  Then type:
+    bun run dev
+  Leave that window open too.
+
+STEP 3 — Open your browser
+  Go to: http://localhost:3000
+
+That is it. The app is running.
+
+To stop: press Ctrl+C in both PowerShell windows.
+
+
+----------------------------------------------------------------
+  HOW TO GET IT LIVE ON THE INTERNET
+----------------------------------------------------------------
+
+Right now the app only works on your own computer. To make it
+accessible from anywhere (your phone, a friend's computer, etc.)
+you need to PUT IT ON THE INTERNET. This is called "deploying".
+
+There is one problem: the app currently uses Ollama which only
+runs on YOUR computer. If the app lives on the internet, it
+cannot reach your Ollama. So we need to switch to an online
+AI service for the deployed version.
+
+YOUR 3 OPTIONS:
+
+────────────────────────────────────────────────────────
+OPTION 1: VERCEL + GROQ (Recommended — FREE)
+────────────────────────────────────────────────────────
+Groq is a company that offers a FREE API for running AI
+models. It is extremely fast and the free tier is generous.
+
+WHAT TO DO:
+
+1. Get a free Groq API key:
+   → Go to https://console.groq.com
+   → Sign up for free
+   → Click "API Keys" and create one
+   → Copy the key (starts with gsk_...)
+
+2. Deploy to Vercel:
+   → Go to https://vercel.com and sign up with GitHub
+   → Click "New Project"
+   → Upload your project folder OR connect a GitHub repo
+   → Add this environment variable in Vercel settings:
+       GROQ_API_KEY = your_key_here
+   → Click Deploy
+
+3. Tell me "switch to Groq" and I will update the code for you.
+
+Cost: FREE (Groq free tier = 14,400 requests/day)
+
+────────────────────────────────────────────────────────
+OPTION 2: VERCEL + GOOGLE GEMINI (Also FREE)
+────────────────────────────────────────────────────────
+Google offers a free AI API called Gemini.
+
+WHAT TO DO:
+
+1. Get a free Google AI key:
+   → Go to https://aistudio.google.com
+   → Sign in with Google
+   → Click "Get API key" — it is free
+   → Copy the key (starts with AIza...)
+
+2. Deploy to Vercel (same as above)
+3. Add environment variable: GOOGLE_API_KEY = your_key
+
+Cost: FREE (1 million tokens/day free)
+
+────────────────────────────────────────────────────────
+OPTION 3: VERCEL + ANTHROPIC CLAUDE (Best quality, small cost)
+────────────────────────────────────────────────────────
+Use Claude (the original AI from this project). Small cost
+but best quality responses.
+
+Cost: ~$0.006 per note (very cheap)
+The $5 free credit covers ~800 notes before any charges.
+
+────────────────────────────────────────────────────────
+HOW VERCEL DEPLOYMENT WORKS (simple explanation):
+────────────────────────────────────────────────────────
+
+Vercel is like a hosting service for Next.js apps. It is
+made by the same team that made Next.js. It is free for
+personal projects.
+
+When you deploy:
+  1. Your code goes from your computer to Vercel's servers
+  2. Vercel builds and runs your app 24/7
+  3. You get a URL like: https://second-brain-xyz.vercel.app
+  4. Anyone can visit that URL from anywhere in the world
+
+YOUR PERSONAL DATA (notes) are stored in the user's browser
+localStorage, not on the server. So each person who visits
+has their own private brain. Nobody sees your notes.
+
+
+----------------------------------------------------------------
+  WHAT YOU SHOULD DO RIGHT NOW
+----------------------------------------------------------------
+
+If you just want to use it on your own computer:
+  → You are done. Follow the "How to Run" section above.
+
+If you want it on the internet:
+  → Tell me which option you want (Groq/Gemini/Claude)
+  → I will update the code for you in 5 minutes
+  → Then you just push to Vercel and it is live
+
+If you want a custom domain (like second-brain.com):
+  → Buy a domain on Namecheap or GoDaddy (~$10/year)
+  → Connect it in Vercel settings (one button click)
+  → Done
+
+If you want others to sign up and use it:
+  → We need to add user accounts and a real database
+  → Tell me and I can build that too
+
+
+----------------------------------------------------------------
+  QUICK REFERENCE — COMMANDS TO REMEMBER
+----------------------------------------------------------------
+
+Start the app locally:
+  ollama serve          (in one terminal window)
+  bun run dev           (in another terminal window)
+  open: http://localhost:3000
+
+Install dependencies (if you move to a new computer):
+  bun install
+
+Check if Ollama is working:
+  ollama list
+
+Download the AI model again if needed:
+  ollama pull qwen2.5:7b
+
+Change the AI model (for example, a bigger one):
+  Edit .env.local and change: OLLAMA_MODEL=llama3.2
+
+
+----------------------------------------------------------------
+  GLOSSARY — WORDS YOU MIGHT NOT KNOW
+----------------------------------------------------------------
+
+API          = A way for two programs to talk to each other
+               Like a waiter taking your order to the kitchen
+
+JSON         = A way of writing data in an organized format
+               Like a very neat bullet point list for computers
+
+Vector       = A list of numbers that represents something
+               Like GPS coordinates but for ideas instead of places
+
+Cosine       = A math concept about angles between lines
+Similarity   = When two vectors point in a similar direction
+
+Algorithm    = A set of steps to solve a problem
+               Like a recipe but for computers
+
+Framework    = Pre-built tools that make building apps easier
+               Like LEGO bricks instead of making bricks from scratch
+
+Deploy       = Putting your app on the internet so others can use it
+
+Runtime      = The program that actually runs your code
+               Like an engine in a car
+
+TypeScript   = JavaScript with spelling/grammar checks built in
+
+Component    = A reusable piece of a webpage (like a button or card)
+
+Hook         = A special React function that manages data or behavior
+
+State        = Data that the app remembers and can change over time
+
+localStorage = A mini-database in your browser that saves permanently
+
+Canvas       = An HTML element you can draw on with code
+
+Node         = A circle on the graph representing one note
+
+Edge         = A line on the graph connecting two similar notes
+
+Physics sim  = Making objects move like they have real weight and forces
+
+Hydration    = When React takes over HTML that was pre-built by the server
+
+
+----------------------------------------------------------------
+  BUILT WITH LOVE — PROJECT SUMMARY
+----------------------------------------------------------------
+
+Name:        Second Brain
+Type:        Full-stack web application
+Frontend:    React + Next.js + TypeScript
+Backend:     Next.js API routes (serverless functions)
+AI Engine:   Ollama running qwen2.5:7b locally (free)
+Database:    Browser localStorage (no server database needed)
+Graph:       HTML Canvas with Fruchterman-Reingold physics
+Search:      Vector cosine similarity (semantic search)
+Lines:       ~1,800 lines of TypeScript code
+Files:       20 source files
+Cost to run: $0.00 (completely free with Ollama)
+
+================================================================
