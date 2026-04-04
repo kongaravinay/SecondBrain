@@ -1,7 +1,21 @@
 {
   "name": "second-brain",
   "version": "1.0.0",
-  "description": "Personal AI Second Brain — vector-powered knowledge graph with Claude",
+  "description": "Personal knowledge management system powered by vector embeddings, semantic search, and RAG — built with Next.js and Groq.",
+  "author": "kongaravinay",
+  "license": "MIT",
+  "keywords": [
+    "second-brain",
+    "knowledge-management",
+    "vector-search",
+    "nextjs",
+    "groq",
+    "llama3",
+    "knowledge-graph",
+    "rag",
+    "semantic-search",
+    "typescript"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
