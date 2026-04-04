@@ -37,9 +37,10 @@ export default function SearchBar({ onSearch, onClear, isSearching, hasResults, 
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Semantic search…"
+            placeholder="Semantic search… (press / to focus)"
             style={styles.input}
             disabled={isSearching}
+            data-search-input="true"
           />
           {(query || hasResults) && (
             <button type="button" onClick={handleClear} style={styles.clearBtn}>×</button>

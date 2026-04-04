@@ -4,7 +4,7 @@
 // The main input form for adding new notes
 // ============================================================
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type { NoteAnalysis } from '@/types'
 import { getDimensionColor, getDimensionName, DIMENSION_ENTRIES } from '@/lib/colors'
 
@@ -17,7 +17,42 @@ interface Props {
 
 export default function NoteInput({ onAddNote, isAnalyzing, lastAnalysis, error }: Props) {
   const [text, setText] = useState('')
+  const [isListening, setIsListening] = useState(false)
+  const [voiceSupported, setVoiceSupported] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const recognitionRef = useRef<any>(null)
+
+  useEffect(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    setVoiceSupported(!!SR)
+  }, [])
+
+  const handleVoice = useCallback(() => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) return
+
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop()
+      return
+    }
+
+    const recognition = new SR()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-US'
+    recognitionRef.current = recognition
+
+    recognition.onstart = () => setIsListening(true)
+    recognition.onend = () => { setIsListening(false); recognitionRef.current = null }
+    recognition.onerror = () => { setIsListening(false); recognitionRef.current = null }
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      setText(prev => prev ? `${prev} ${transcript}` : transcript)
+      textareaRef.current?.focus()
+    }
+
+    recognition.start()
+  }, [isListening])
 
   const handleSubmit = useCallback(async () => {
     if (!text.trim() || isAnalyzing) return
@@ -45,7 +80,22 @@ export default function NoteInput({ onAddNote, isAnalyzing, lastAnalysis, error 
           disabled={isAnalyzing}
           style={styles.textarea}
           rows={3}
+          data-note-input="true"
         />
+        {voiceSupported && (
+          <button
+            type="button"
+            onClick={handleVoice}
+            title={isListening ? 'Stop recording' : 'Speak a note (voice input)'}
+            style={{
+              ...styles.voiceBtn,
+              background: isListening ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.06)',
+              borderColor: isListening ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.12)',
+            }}
+          >
+            {isListening ? '⏹' : '🎙'}
+          </button>
+        )}
         <button
           onClick={handleSubmit}
           disabled={!text.trim() || isAnalyzing}
@@ -147,6 +197,17 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.5,
     resize: 'none',
     outline: 'none',
+  },
+  voiceBtn: {
+    border: '1px solid',
+    borderRadius: 10,
+    color: '#e0e0f0',
+    padding: '0 12px',
+    height: 40,
+    fontSize: 16,
+    cursor: 'pointer',
+    flexShrink: 0,
+    transition: 'background 0.2s, border-color 0.2s',
   },
   button: {
     background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',

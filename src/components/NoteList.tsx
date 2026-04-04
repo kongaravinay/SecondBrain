@@ -13,6 +13,8 @@ interface Props {
   selectedNoteId: string | null
   onSelectNote: (id: string) => void
   onDeleteNote: (id: string) => void
+  onEditNote: (id: string, newContent: string) => Promise<boolean>
+  isAnalyzing: boolean
 }
 
 export default function NoteList({
@@ -21,6 +23,8 @@ export default function NoteList({
   selectedNoteId,
   onSelectNote,
   onDeleteNote,
+  onEditNote,
+  isAnalyzing,
 }: Props) {
   const displayItems = searchResults ?? notes.map(n => ({ note: n, score: undefined }))
 
@@ -55,6 +59,8 @@ export default function NoteList({
           searchScore={'score' in item ? item.score : undefined}
           onSelect={() => onSelectNote(item.note.id)}
           onDelete={() => onDeleteNote(item.note.id)}
+          onEdit={(newContent) => onEditNote(item.note.id, newContent)}
+          isAnalyzing={isAnalyzing}
         />
       ))}
     </div>

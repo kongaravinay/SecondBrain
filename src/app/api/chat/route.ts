@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const GROQ_API_KEY = process.env.GROQ_API_KEY
-const GROQ_MODEL   = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+import { chat } from '@/lib/ai'
 
 export async function POST(req: NextRequest) {
   try {
-    if (!GROQ_API_KEY) {
-      return NextResponse.json({ error: 'GROQ_API_KEY not configured' }, { status: 500 })
-    }
-
     const { question, context } = await req.json()
     if (!question || typeof question !== 'string') {
       return NextResponse.json({ error: 'question is required' }, { status: 400 })
@@ -24,30 +18,13 @@ export async function POST(req: NextRequest) {
       ? `You are a personal knowledge assistant for a Second Brain app. Answer the user's question using ONLY the notes provided below. If the notes don't contain enough information to answer, say so honestly. Be concise and direct. Reference specific notes when relevant.\n\n${contextBlock}`
       : `You are a personal knowledge assistant. The user's Second Brain has no notes yet. Encourage them to add some notes first.`
 
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: question },
-        ],
-        temperature: 0.3,
-        max_tokens: 512,
-      }),
-    })
-
-    if (!res.ok) {
-      const errText = await res.text()
-      return NextResponse.json({ error: `Groq API error ${res.status}: ${errText}` }, { status: 500 })
-    }
-
-    const data = await res.json()
-    const answer = data.choices?.[0]?.message?.content ?? 'No response'
+    const answer = await chat(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: question },
+      ],
+      { temperature: 0.3, maxTokens: 512 }
+    )
 
     return NextResponse.json({ answer })
   } catch (err) {

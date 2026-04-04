@@ -122,6 +122,25 @@ export function useForceGraph(canvasWidth: number, canvasHeight: number) {
     [recomputeEdges]
   )
 
+  // ---- Update a node when its note is edited ----
+  const updateNodeInGraph = useCallback(
+    (note: Note) => {
+      const dim = dominantDimension(note.analysis.vector)
+      setNodes(prev => {
+        const next = prev.map(n =>
+          n.id === note.id
+            ? { ...n, note, dominantDim: dim, radius: Math.min(22, 14 + note.content.length / 100) }
+            : n
+        )
+        const newEdges = recomputeEdges(next, thresholdRef.current)
+        edgesRef.current = newEdges
+        setEdges(newEdges)
+        return next
+      })
+    },
+    [recomputeEdges]
+  )
+
   // ---- Update similarity threshold ----
   const updateThreshold = useCallback(
     (threshold: number) => {
@@ -190,5 +209,6 @@ export function useForceGraph(canvasWidth: number, canvasHeight: number) {
     setHoveredNodeId,
     pinNode,
     unpinNode,
+    updateNodeInGraph,
   }
 }

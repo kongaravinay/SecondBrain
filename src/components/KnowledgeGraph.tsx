@@ -18,6 +18,7 @@ interface Props {
   edges: GraphEdge[]
   selectedNodeId: string | null
   hoveredNodeId: string | null
+  highlightedNodeIds?: Set<string>
   onSelectNode: (id: string | null) => void
   onHoverNode: (id: string | null) => void
   onPinNode: (id: string, x: number, y: number) => void
@@ -37,6 +38,7 @@ export default function KnowledgeGraph({
   edges,
   selectedNodeId,
   hoveredNodeId,
+  highlightedNodeIds,
   onSelectNode,
   onHoverNode,
   onPinNode,
@@ -132,7 +134,21 @@ export default function KnowledgeGraph({
       const color = getDimensionColor(node.dominantDim)
       const isSelected = node.id === selectedNodeId
       const isHovered = node.id === hoveredNodeId
+      const isHighlighted = highlightedNodeIds?.has(node.id) ?? false
       const r = isSelected ? node.radius * 1.5 : isHovered ? node.radius * 1.25 : node.radius
+
+      // Search highlight ring (drawn first, beneath everything)
+      if (isHighlighted && !isSelected) {
+        ctx.beginPath()
+        ctx.arc(node.x, node.y, r + 6, 0, Math.PI * 2)
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.9)'
+        ctx.lineWidth = 2
+        ctx.shadowColor = 'rgba(16, 185, 129, 0.6)'
+        ctx.shadowBlur = 14
+        ctx.stroke()
+        ctx.shadowBlur = 0
+        ctx.shadowColor = 'transparent'
+      }
 
       // Glow effect
       if (isSelected || isHovered) {
@@ -197,7 +213,7 @@ export default function KnowledgeGraph({
       ctx.textBaseline = 'middle'
       ctx.fillText('Add your first note to begin mapping your knowledge', width / 2, height / 2)
     }
-  }, [nodes, edges, selectedNodeId, hoveredNodeId, width, height])
+  }, [nodes, edges, selectedNodeId, hoveredNodeId, highlightedNodeIds, width, height])
 
   // ---- Mouse events ----
   const handleMouseMove = useCallback(

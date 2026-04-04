@@ -4,7 +4,7 @@
 // Note state: add, delete, search, import, load from storage
 // ============================================================
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Note, NoteAnalysis, SearchResult } from '@/types'
 import { loadNotes, saveNotes } from '@/lib/storage'
 import { rankByRelevance } from '@/lib/vectorMath'
@@ -20,6 +20,7 @@ export function useNotes() {
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [lastAnalysis, setLastAnalysis] = useState<NoteAnalysis | null>(null)
+  const notesRef = useRef<Note[]>([])
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -27,9 +28,10 @@ export function useNotes() {
     if (saved.length > 0) setNotes(saved)
   }, [])
 
-  // Persist on every change
+  // Persist on every change + keep ref in sync
   useEffect(() => {
     saveNotes(notes)
+    notesRef.current = notes
   }, [notes])
 
   /** Send note to Claude, get analysis, add to state */
@@ -82,6 +84,39 @@ export function useNotes() {
       return next
     })
     setSearchResults(prev => prev?.filter(r => r.note.id !== id) ?? null)
+  }, [])
+
+  /** Edit a note: re-analyze with new content, update vector */
+  const editNote = useCallback(async (id: string, newContent: string): Promise<Note | null> => {
+    if (!newContent.trim()) return null
+    setIsAnalyzing(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newContent.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error || `Server error ${res.status}`)
+
+      let updatedNote: Note | null = null
+      setNotes(prev => {
+        const next = prev.map(n => {
+          if (n.id !== id) return n
+          updatedNote = { ...n, content: newContent.trim(), analysis: data.analysis }
+          return updatedNote
+        })
+        saveNotes(next)
+        return next
+      })
+      return updatedNote
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update note')
+      return null
+    } finally {
+      setIsAnalyzing(false)
+    }
   }, [])
 
   /** Semantic search: vectorize query via Claude, then rank by cosine similarity */
@@ -187,6 +222,7 @@ export function useNotes() {
     clearAllNotes,
     importNotesList,
     chatWithBrain,
+    editNote,
     setError,
   }
 }
